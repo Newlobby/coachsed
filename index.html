@@ -566,7 +566,7 @@ async function callClaude(msg,json=false){
   const messages=[];
   if(!json)STATE.chatHistory.forEach(m=>messages.push(m));
   messages.push({role:'user',content:msg});
-  const payload={model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages};
+  const payload={model:'claude-sonnet-4-5',max_tokens:1000,system:SYSTEM_PROMPT,messages};
   let res;
   try{
     res=await fetch('https://coachsed-api.newlobby75.workers.dev',{
