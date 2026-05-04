@@ -563,9 +563,35 @@ function renderProgress(){
 }
 
 async function callClaude(msg,json=false){
+  const apiKey=localStorage.getItem('csed_apikey');
+  if(!apiKey){showApiSetup();throw new Error('No API key');}
   const messages=[];if(!json)STATE.chatHistory.forEach(m=>messages.push(m));messages.push({role:'user',content:msg});
-  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'sk-ant-api03-d46Dx9LmjsIYYfOkLJoZEO','anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages})});
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages})});
   if(!res.ok)throw new Error('API '+res.status);const d=await res.json();return(d.content||[]).map(b=>b.text||'').join('');
+}
+
+function showApiSetup(){
+  if(document.getElementById('api-setup-overlay'))return;
+  const overlay=document.createElement('div');
+  overlay.id='api-setup-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(8,8,16,0.97);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;backdrop-filter:blur(10px);';
+  overlay.innerHTML=`
+    <div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#00f5a0,#00d4ff);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:#080810;margin-bottom:20px;">CS</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#f1f0ff;margin-bottom:8px;text-align:center;">Configuration clé API</div>
+    <div style="font-size:13px;color:#8b8bbd;text-align:center;line-height:1.6;margin-bottom:24px;">Ta clé est stockée uniquement sur ton iPhone.<br>Elle ne sera jamais partagée ni visible dans le code.</div>
+    <input id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="width:100%;background:#141428;border:1px solid rgba(167,139,250,0.3);border-radius:12px;color:#f1f0ff;font-family:'Space Grotesk',sans-serif;font-size:13px;padding:13px 15px;outline:none;margin-bottom:12px;box-sizing:border-box;">
+    <button onclick="saveApiKey()" style="width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;background:linear-gradient(135deg,#00f5a0,#00d4ff);color:#080810;margin-bottom:10px;">Enregistrer et continuer</button>
+    <div style="font-size:11px;color:#4a4a7a;text-align:center;">Clé disponible sur console.anthropic.com</div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function saveApiKey(){
+  const key=document.getElementById('api-key-input').value.trim();
+  if(!key||!key.startsWith('sk-ant-'))return alert('Clé invalide — elle doit commencer par sk-ant-');
+  localStorage.setItem('csed_apikey',key);
+  document.getElementById('api-setup-overlay')?.remove();
+  alert('Clé enregistrée ✓ Tu peux utiliser le Coach IA !');
 }
 
 function scrollChat(){const e=document.getElementById('chat-msgs');setTimeout(()=>e.scrollTop=e.scrollHeight,50);}
