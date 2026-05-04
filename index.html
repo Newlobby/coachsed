@@ -565,7 +565,10 @@ function renderProgress(){
 async function callClaude(msg,json=false){
   const messages=[];if(!json)STATE.chatHistory.forEach(m=>messages.push(m));messages.push({role:'user',content:msg});
   const res=await fetch('https://coachsed-api.newlobby75.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages})});
-  if(!res.ok)throw new Error('API '+res.status);const d=await res.json();return(d.content||[]).map(b=>b.text||'').join('');
+  if(!res.ok){const err=await res.text();throw new Error('API '+res.status+' '+err);}
+  const d=await res.json();
+  if(d.error)throw new Error(d.error.message||'API error');
+  return(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
 }
 
 function showApiSetup(){
