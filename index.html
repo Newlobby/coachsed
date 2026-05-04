@@ -564,7 +564,7 @@ function renderProgress(){
 
 async function callClaude(msg,json=false){
   const messages=[];if(!json)STATE.chatHistory.forEach(m=>messages.push(m));messages.push({role:'user',content:msg});
-  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages})});
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'sk-ant-api03-d46Dx9LmjsIYYfOkLJoZEO','anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages})});
   if(!res.ok)throw new Error('API '+res.status);const d=await res.json();return(d.content||[]).map(b=>b.text||'').join('');
 }
 
